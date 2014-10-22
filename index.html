@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="./gl-matrix-min.js"></script>
+    <script type="text/javascript" src="./enchant.js"></script>
+    <script type="text/javascript" src="./gl.enchant.js"></script>
+    <script type="text/javascript" src="./primitive.gl.enchant.js"></script>
+    <script type="text/javascript">
+enchant();
+var MyClass = {};
+MyClass.Texture = "./bill.jpg";
+MyClass.Cube = enchant.Class.create(enchant.gl.primitive.Box,{
+        initialize: function(){
+            var ys = Math.round(Math.random()* Math.random() *  8) +1;
+            enchant.gl.primitive.Box.call(this, 0.5, ys, 0.5 );
+            var offSet = 128;
+            this.sf = new Surface(offSet, offSet);
+            this.sf.draw(enchant.Core.instance.assets[MyClass.Texture]);
+            this.mesh.texture.src = this.sf;
+            this.mesh.texture.shiness = 0.5;
+            this.mesh.texture.ambient  = [0.4, 0.4, 0.4, 1];
+            this.mesh.texture.diffuse  = [0.7, 0.7, 0.7, 1];
+            this.mesh.texture.specular = [0.7, 0.7, 0.7, 1];
+            var phi = (Math.floor(Math.random()*4) %4) * 90;
+            this.rotationApply(new Quat(0, 1, 0, Math.PI/180 * phi));
+            if(Math.random() > 0.5){
+                this.rotationApply(new Quat(0, 0, 1, Math.PI));
+            }
+        }
+});   
+var set3d = function(){
+    var scene3d = new Scene3D(); 
+    var camera = scene3d.getCamera(); 
+    camera.x = 0;
+    camera.y = 10;
+    camera.z = 30;
+    camera.centerX = 10;
+    camera.centerY = 0;
+    camera.centerZ = 10;
+    camera.upVectorX = 0;
+    camera.upVectorY = 1;
+    camera.upVectorZ = 0;
+    var dLight = new DirectionalLight();
+    dLight.color = [1.0, 1.0, 1.0];
+    var aLight = new AmbientLight();
+    aLight.color = [1.0, 1.0, 1.0];
+    scene3d.backgroundColor = [0.1, 0.2, 0.25, 1];
+    scene3d.setDirectionalLight(dLight);
+    scene3d.setAmbientLight(aLight);
+    gemNightCity(scene3d);
+}
+var gemNightCity = function(scene){
+    var w = 15;
+    var h = 15;
+    var fl = new enchant.gl.primitive.PlaneXZ(100);
+    fl.x = w/2;
+    fl.y = 0;
+    fl.z = h/2;
+    fl.mesh.setBaseColor("#000000");
+    fl.mesh.shiness = 0;
+    scene.addChild(fl);
+    fl.addEventListener('enterframe', function(){
+            var c = scene.getCamera();
+            c.x = Math.cos(this.age/100) * 30;
+            c.z = Math.sin(this.age/100) * 30;
+    });
+    for(var i=0;i<w;i++){
+        for(var j=0;j<h;j++){
+            var b = new MyClass.Cube();
+            b.x = i * 2.1 - w/2
+            b.y = 0;
+            b.z = j * 2.1 - h/2;
+            scene.addChild(b);
+        }
+    }
+};
+window.onload = function(){
+    var core = new Core(512, 512);
+    core.preload(MyClass.Texture);
+    core.onload = function(){
+        set3d();
+    };
+    core.start();
+}   
+    </script>
+    </head>
+<body>
+</body>
+</html>
