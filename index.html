@@ -10,15 +10,88 @@
     <script type="text/javascript">
 enchant();
 var MyClass = {};
-MyClass.Texture = "./bill.jpg";
+MyClass.BILLDING_COLOR = "#000000";
+MyClass.WINDOW_COLOR_0 = "#ffcc00";
+MyClass.WINDOW_COLOR_1 = "#ccffff";
+MyClass.WINDOW_COLOR_2 = "#acbccc";
 MyClass.Cube = enchant.Class.create(enchant.gl.primitive.Box,{
         initialize: function(){
+            var xs = 0.5;
             var ys = Math.round(Math.random()* Math.random() *  8) +1;
-            enchant.gl.primitive.Box.call(this, 0.5, ys, 0.5 );
-            var offSet = 128;
-            this.sf = new Surface(offSet, offSet);
-            this.sf.draw(enchant.Core.instance.assets[MyClass.Texture]);
-            this.mesh.texture.src = this.sf;
+            var zs = 0.5;
+            enchant.gl.primitive.Box.call(this, xs, ys, zs);
+            var scale =150; ///窓密度
+            var offSetX = zs * scale;
+            var offSetY = (xs + ys) * scale;
+
+            var windowWidth = 8;
+            var windowHeight = 4;
+            var windowMarginHorizon = 2;
+            var windowMarginVert = 6;
+            var sf = new Surface(offSetX, offSetY);
+            var ctx = sf.context;
+            //全面黒塗り
+            ctx.fillStyle = MyClass.BILLDING_COLOR;
+            ctx.fillRect(0, 0, offSetX*scale, offSetY*scale);
+            //テクスチャテスト
+            ctx.fillStyle = "#FF0000";
+            //ctx.fillRect(offSet*scale/2, offSet*scale/2, offSet*scale, offSet*scale); //半分是後塗られる
+            //ctx.fillRect(0, 0, offSet*scale/2, offSet*scale/2); //変化なし
+            //x-y平面の描画
+            for(var i=0;i<zs*scale;i++){
+                for(var j=0;j<offSetY;j++){
+                    if(i % ((windowWidth + windowMarginHorizon)*2) === 0){
+                        //横方向窓描画開始地点
+                        if(j % ((windowHeight + windowMarginVert)*1) === 0){
+                            //縦方向窓描画開始地点
+                            var f = Math.random();
+                            if(f < 0.2){
+                                ctx.fillStyle = MyClass.WINDOW_COLOR_0;
+                            }else if(f < 0.4 ){
+                                ctx.fillStyle = MyClass.WINDOW_COLOR_1;
+                            }else if(f < 0.6){
+                                ctx.fillStyle = MyClass.WINDOW_COLOR_2;
+                            }else{
+                                ctx.fillStyle = MyClass.BILLDING_COLOR;
+                            }
+                            ctx.fillRect(i, j, windowWidth, windowHeight);
+                        }
+                    }
+                }
+            }
+            //テクスチャを貼る
+            //fx 1にするとビルの多様性がマス
+            var fx = 0.5, fy = ys, fz = 0.5; //キューブのローカル座標内でテクスチャを貼る位置場所を処理する変数
+            this.mesh.vertices = [ //テクスチャを貼るオブジェクトのローカル座標での面の座標
+                fx, fy, fz,  -fx, fy, fz,  -fx,-fy, fz,   fx,-fy, fz,  // v0-v1-v2-v3 front
+                fx, fy, fz,   fx, fy,-fz,  fx,-fy,-fz,      fx,-fy, fz,   // v0-v3-v4-v5 right
+                -fx, fy, fz,  -fx, fy,-fz, fx, fy,-fz,   fx, fy, fz,  // v0-v5-v6-v1 top
+                -fx, fy, fz,  -fx, fy,-fz,  -fx,-fy,-fz,  -fx,-fy, fz,  // v1-v6-v7-v2 left
+                -fx,-fy,-fz,   fx,-fy,-fz,   fx,-fy, fz,  -fx,-fy, fz,  // v7-v4-v3-v2 bottom
+                fx, fy,-fz,   -fx, fy,-fz,    -fx,-fy,-fz, fx,-fy,-fz // v4-v7-v6-v5 back
+            ];
+            this.mesh.normals = [ //ローカル座標で法線の方向を指定する（テクスチャを貼る表裏を決める）v0
+                0, 0, 1,   0, 0, 1,   0, 0, 1,   0, 0, 1,   // v0-v1-v2-v3 front
+                1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,   // v0-v3-v4-v5 right
+                0, 1, 0,   0, 1, 0,   0, 1, 0,   0, 1, 0,   // v0-v5-v6-v1 top
+                -1, 0, 0,  -1, 0, 0,  -1, 0, 0,  -1, 0, 0,   // v1-v6-v7-v2 left
+                0,-1, 0,   0,-1, 0,   0,-1, 0,   0,-1, 0,   // v7-v4-v3-v2 bottom
+                0, 0,-1,   0, 0,-1,   0, 0,-1,   0, 0,-1    // v4-v7-v6-v5 back
+            ];
+            var db = 1;
+            var dtY = ys/offSetY*scale;
+            var dbY = xs/offSetY*scale;
+            this.mesh.texCoords = [ //テクスチャ画像の切り取る部分を指定する
+                0, 0,   db,0,   db,dtY,   0, dtY, //SIDE
+                0, 0,   db,0,   db,dtY,   0, dtY, //SIDE --
+                1,1, 1,1,  1,1,  1,1, //TOP
+                0, 0,   db,0,   db,dtY,   0, dtY, //SIDE
+                1,1,   1,1,   1,1,    1,1, //BOTTOM
+                0, 0,   db,0,   db,dtY,   0, dtY, //SIDE --
+            ];
+            this.mesh.texture.src = sf;
+            var core = enchant.Core.instance;
+            //this.mesh.texture.src = core.assets[MyClass.Resouce];;
             this.mesh.texture.shiness = 0.5;
             this.mesh.texture.ambient  = [0.4, 0.4, 0.4, 1];
             this.mesh.texture.diffuse  = [0.7, 0.7, 0.7, 1];
@@ -51,20 +124,45 @@ var set3d = function(){
     scene3d.setAmbientLight(aLight);
     gemNightCity(scene3d);
 }
-var gemNightCity = function(scene){
-    var w = 15;
-    var h = 15;
+var createNightCityFloor = function(scene, w, h){
     var fl = new enchant.gl.primitive.PlaneXZ(100);
+    fl.mesh.setBaseColor("#000011");
+    fl.mesh.texture.ambient  = [0.4, 0.4, 0.4, 0];
+    fl.mesh.texture.diffuse  = [0.7, 0.7, 0.7, 0];
+    fl.mesh.texture.specular = [0.7, 0.7, 0.7, 0];
+    fl.mesh.shiness = 0;
     fl.x = w/2;
     fl.y = 0;
     fl.z = h/2;
-    fl.mesh.setBaseColor("#000000");
-    fl.mesh.shiness = 0;
+    var scale = 100;
+    var sfloor = new Surface(scale, scale);
+    var ctx = sfloor.context;
+    ctx.fillStyle = MyClass.BILLDING_COLOR;
+    ctx.fillRect(0, 0, scale, scale);
+    var dens = 10;
+    ctx.fillStyle = MyClass.WINDOW_COLOR_0;
+    for(var i=0;i<scale;i++){
+        if(i % dens === 0){
+            ctx.fillRect(i, 0, 1, scale);
+        }
+    }
+    for(var j=0;j<scale;j++){
+        if(j % dens === 0){
+            ctx.fillRect(0, j, scale, 1);
+        }
+    }
     scene.addChild(fl);
-    fl.addEventListener('enterframe', function(){
+    return fl;
+}
+var gemNightCity = function(scene){
+    var w = 15;
+    var h = 15;
+    var fl = createNightCityFloor(scene,w, h);
+
+    enchant.Core.instance.rootScene.addEventListener('enterframe', function(){
             var c = scene.getCamera();
-            c.x = Math.cos(this.age/100) * 30;
-            c.z = Math.sin(this.age/100) * 30;
+            c.x = Math.cos(this.age/100) * 20;
+            c.z = Math.sin(this.age/100) * 20;
     });
     for(var i=0;i<w;i++){
         for(var j=0;j<h;j++){
@@ -78,7 +176,6 @@ var gemNightCity = function(scene){
 };
 window.onload = function(){
     var core = new Core(512, 512);
-    core.preload(MyClass.Texture);
     core.onload = function(){
         set3d();
     };
