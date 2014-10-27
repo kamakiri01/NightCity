@@ -96,6 +96,7 @@ MyClass.Cube = enchant.Class.create(enchant.gl.primitive.Box,{
             this.mesh.texture.ambient  = [0.4, 0.4, 0.4, 1];
             this.mesh.texture.diffuse  = [0.7, 0.7, 0.7, 1];
             this.mesh.texture.specular = [0.7, 0.7, 0.7, 1];
+            this.mesh.shiness = 1;
             var phi = (Math.floor(Math.random()*4) %4) * 90;
             this.rotationApply(new Quat(0, 1, 0, Math.PI/180 * phi));
             if(Math.random() > 0.5){
@@ -106,15 +107,16 @@ MyClass.Cube = enchant.Class.create(enchant.gl.primitive.Box,{
 var set3d = function(){
     var scene3d = new Scene3D(); 
     var camera = scene3d.getCamera(); 
-    camera.x = 0;
-    camera.y = 10;
-    camera.z = 30;
-    camera.centerX = 10;
-    camera.centerY = 0;
-    camera.centerZ = 10;
-    camera.upVectorX = 0;
-    camera.upVectorY = 1;
-    camera.upVectorZ = 0;
+    cameraRoll(scene3d);
+//    camera.x = 0;
+//    camera.y = 5;
+//    camera.z = 30;
+//    camera.centerX = 10;
+//    camera.centerY = 0;
+//    camera.centerZ = 10;
+//    camera.upVectorX = 0;
+//    camera.upVectorY = 1;
+//    camera.upVectorZ = 0;
     var dLight = new DirectionalLight();
     dLight.color = [1.0, 1.0, 1.0];
     var aLight = new AmbientLight();
@@ -124,9 +126,23 @@ var set3d = function(){
     scene3d.setAmbientLight(aLight);
     gemNightCity(scene3d);
 }
+var cameraRoll = function(scene){
+    var age = enchant.Core.instance.rootScene.age;
+    if(age > 1){
+    var c = scene.getCamera();
+    c.x = Math.cos(age/100) * 18 + 10;
+    c.y = 5 + Math.sin(age/100)*2;
+    c.z = Math.sin(age/100) * 18;
+    c.centerX = 10;
+    c.centerY = 0;
+    c.centerZ = 10;
+    c.centerX = Math.cos(age/100) * 5 + 10;
+    c.centerZ = Math.sin(age/100) * 5;
+    }
+}
 var createNightCityFloor = function(scene, w, h){
     var fl = new enchant.gl.primitive.PlaneXZ(100);
-    fl.mesh.setBaseColor("#000011");
+    fl.mesh.setBaseColor("#000000");
     fl.mesh.texture.ambient  = [0.4, 0.4, 0.4, 0];
     fl.mesh.texture.diffuse  = [0.7, 0.7, 0.7, 0];
     fl.mesh.texture.specular = [0.7, 0.7, 0.7, 0];
@@ -155,14 +171,12 @@ var createNightCityFloor = function(scene, w, h){
     return fl;
 }
 var gemNightCity = function(scene){
-    var w = 15;
-    var h = 15;
+    var w = 20;
+    var h = 20;
     var fl = createNightCityFloor(scene,w, h);
 
     enchant.Core.instance.rootScene.addEventListener('enterframe', function(){
-            var c = scene.getCamera();
-            c.x = Math.cos(this.age/100) * 20;
-            c.z = Math.sin(this.age/100) * 20;
+            cameraRoll(scene);
     });
     for(var i=0;i<w;i++){
         for(var j=0;j<h;j++){
