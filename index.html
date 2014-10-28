@@ -35,8 +35,6 @@ MyClass.Cube = enchant.Class.create(enchant.gl.primitive.Box,{
             ctx.fillRect(0, 0, offSetX*scale, offSetY*scale);
             //テクスチャテスト
             ctx.fillStyle = "#FF0000";
-            //ctx.fillRect(offSet*scale/2, offSet*scale/2, offSet*scale, offSet*scale); //半分是後塗られる
-            //ctx.fillRect(0, 0, offSet*scale/2, offSet*scale/2); //変化なし
             //x-y平面の描画
             for(var i=0;i<zs*scale;i++){
                 for(var j=0;j<offSetY;j++){
@@ -90,8 +88,6 @@ MyClass.Cube = enchant.Class.create(enchant.gl.primitive.Box,{
                 0, 0,   db,0,   db,dtY,   0, dtY, //SIDE --
             ];
             this.mesh.texture.src = sf;
-            var core = enchant.Core.instance;
-            //this.mesh.texture.src = core.assets[MyClass.Resouce];;
             this.mesh.texture.shiness = 0.5;
             this.mesh.texture.ambient  = [0.4, 0.4, 0.4, 1];
             this.mesh.texture.diffuse  = [0.7, 0.7, 0.7, 1];
@@ -108,15 +104,6 @@ var set3d = function(){
     var scene3d = new Scene3D(); 
     var camera = scene3d.getCamera(); 
     cameraRoll(scene3d);
-//    camera.x = 0;
-//    camera.y = 5;
-//    camera.z = 30;
-//    camera.centerX = 10;
-//    camera.centerY = 0;
-//    camera.centerZ = 10;
-//    camera.upVectorX = 0;
-//    camera.upVectorY = 1;
-//    camera.upVectorZ = 0;
     var dLight = new DirectionalLight();
     dLight.color = [1.0, 1.0, 1.0];
     var aLight = new AmbientLight();
@@ -167,6 +154,10 @@ var createNightCityFloor = function(scene, w, h){
             ctx.fillRect(0, j, scale, 1);
         }
     }
+    var hoge = new Surface(1, 1);
+    var hash = document.createElement('canvas');
+    var context = hash.getContext("2d");
+    //fl.mesh.texture.src = context;
     scene.addChild(fl);
     return fl;
 }
