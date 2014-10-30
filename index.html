@@ -10,10 +10,12 @@
     <script type="text/javascript">
 enchant();
 var MyClass = {};
-MyClass.BILLDING_COLOR = "#000000";
-MyClass.WINDOW_COLOR_0 = "#ffcc00";
-MyClass.WINDOW_COLOR_1 = "#ccffff";
-MyClass.WINDOW_COLOR_2 = "#acbccc";
+MyClass.BILLDING_COLOR   = "#000000";
+MyClass.FIELD_COLOR = "#000000";
+MyClass.FIELD_ROAD_COLOR = "#fcfcfc";
+MyClass.WINDOW_COLOR_0   = "#ffcc00";
+MyClass.WINDOW_COLOR_1   = "#ccffff";
+MyClass.WINDOW_COLOR_2   = "#acbccc";
 MyClass.Cube = enchant.Class.create(enchant.gl.primitive.Box,{
         initialize: function(){
             var xs = 0.5;
@@ -87,9 +89,10 @@ MyClass.Cube = enchant.Class.create(enchant.gl.primitive.Box,{
                 1,1,   1,1,   1,1,    1,1, //BOTTOM
                 0, 0,   db,0,   db,dtY,   0, dtY, //SIDE --
             ];
-            this.mesh.texture.src = sf;
-            this.mesh.texture.shiness = 0.5;
-            this.mesh.texture.ambient  = [0.4, 0.4, 0.4, 1];
+                sf._element.src = Math.random();
+                this.mesh.texture.src = sf;
+                this.mesh.texture.shiness = 0.5;
+                this.mesh.texture.ambient  = [0.4, 0.4, 0.4, 1];
             this.mesh.texture.diffuse  = [0.7, 0.7, 0.7, 1];
             this.mesh.texture.specular = [0.7, 0.7, 0.7, 1];
             this.mesh.shiness = 1;
@@ -117,54 +120,50 @@ var cameraRoll = function(scene){
     var age = enchant.Core.instance.rootScene.age;
     if(age > 1){
     var c = scene.getCamera();
-    c.x = Math.cos(age/100) * 18 + 10;
+    c.x = Math.cos(age/100) * 10;// + 10;
     c.y = 5 + Math.sin(age/100)*2;
-    c.z = Math.sin(age/100) * 18;
+    c.z = Math.sin(age/100) * 10;
     c.centerX = 10;
-    c.centerY = 0;
-    c.centerZ = 10;
-    c.centerX = Math.cos(age/100) * 5 + 10;
-    c.centerZ = Math.sin(age/100) * 5;
+    c.centerX = 0;//Math.cos(age/100) * 5 + 10;
+    c.centerZ = 0;//Math.sin(age/100) * 5;
     }
 }
 var createNightCityFloor = function(scene, w, h){
     var fl = new enchant.gl.primitive.PlaneXZ(100);
-    fl.mesh.setBaseColor("#000000");
-    fl.mesh.texture.ambient  = [0.4, 0.4, 0.4, 0];
-    fl.mesh.texture.diffuse  = [0.7, 0.7, 0.7, 0];
-    fl.mesh.texture.specular = [0.7, 0.7, 0.7, 0];
-    fl.mesh.shiness = 0;
+    fl.mesh.setBaseColor("#303030"); //道路色
+    fl.mesh.texture.ambient  = [0.4, 0.4, 0.4, 1];
+    fl.mesh.texture.diffuse  = [0.7, 0.7, 0.7, 1];
+    fl.mesh.texture.specular = [0.7, 0.7, 0.7, 1];
+    fl.mesh.shiness = 1;
     fl.x = w/2;
     fl.y = 0;
     fl.z = h/2;
-    var scale = 100;
+    var scale = 1000;
     var sfloor = new Surface(scale, scale);
     var ctx = sfloor.context;
-    ctx.fillStyle = MyClass.BILLDING_COLOR;
+    ctx.fillStyle = MyClass.FIELD_COLOR;
     ctx.fillRect(0, 0, scale, scale);
+    ctx.fillStyle = "#ffffff";
     var dens = 10;
-    ctx.fillStyle = MyClass.WINDOW_COLOR_0;
     for(var i=0;i<scale;i++){
-        if(i % dens === 0){
-            ctx.fillRect(i, 0, 1, scale);
+        if(i % dens === dens-1){
+            ctx.fillRect(i, 0, 2, scale);
         }
     }
     for(var j=0;j<scale;j++){
-        if(j % dens === 0){
-            ctx.fillRect(0, j, scale, 1);
+        if(j % dens === dens-1){
+            ctx.fillRect(0, j, scale, 2);
         }
     }
-    var hoge = new Surface(1, 1);
-    var hash = document.createElement('canvas');
-    var context = hash.getContext("2d");
-    //fl.mesh.texture.src = context;
-    scene.addChild(fl);
+
+    fl.mesh.texture.src = sfloor;
     return fl;
 }
 var gemNightCity = function(scene){
-    var w = 20;
-    var h = 20;
+    var w = 15;
+    var h = 15;
     var fl = createNightCityFloor(scene,w, h);
+    scene.addChild(fl);
 
     enchant.Core.instance.rootScene.addEventListener('enterframe', function(){
             cameraRoll(scene);
@@ -172,9 +171,9 @@ var gemNightCity = function(scene){
     for(var i=0;i<w;i++){
         for(var j=0;j<h;j++){
             var b = new MyClass.Cube();
-            b.x = i * 2.1 - w/2
+            b.x = i * 2.0 - w/2
             b.y = 0;
-            b.z = j * 2.1 - h/2;
+            b.z = j * 2.0 - h/2;
             scene.addChild(b);
         }
     }
